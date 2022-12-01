@@ -1,0 +1,7 @@
+<launch>
+
+    <include file="/home/akos/catkin_ws/src/turtlebot3_simulations/turtlebot3_gazebo/launch/multi_turtlebot3.launch" />
+    <node name="acc_pkg_node" pkg="acc_pkg" type="acc_pkg_node" output="screen" />
+    <node name="visualization" pkg="visualization_pkg" type="visualization.py" />
+
+</launch>
