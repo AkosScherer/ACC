@@ -305,7 +305,7 @@ void callback_jointstates(const sensor_msgs::JointState::ConstPtr& data){
 
         }
 
-        turning_radius_container[0] = (0.16 / ((wheel_spin_act[0] - wheel_spin_act[1]) / wheel_spin_act[0])) * (-1); // AMIKOR KOMMENTELTEM KI A DOLGOKAT ÉSZREVETTEM, HOGY A KÉPLET MINDKÉT ESETBEN UGYAN AZ VOLT, EZÉRT ITT ÁTÍRTAM, DE FIGYELNI KELL MAJD, HOGY JÓL SZÁMOLJA-E
+        turning_radius_container[0] = (0.16 / ((wheel_spin_act[0] - wheel_spin_act[1]) / wheel_spin_act[0])) * (-1); 
 
         avg_turning_radius = ((turning_radius_container[0] + turning_radius_container[1] + turning_radius_container[2] + turning_radius_container[3] + turning_radius_container[4]) / 5) * (-1);
 
@@ -336,17 +336,17 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
 
     // lokális változók definiálása
     vector<float> actual_ranges;                                // lidar által detektált pontok távolsága
-    vector<float> x_y(2);                                          // lidar által detektált pontok távolsága 2 dimenziós Decart koordináta rendszerben
+    vector<float> x_y(2);                                          // lidar által detektált pontok távolsága 2 dimenziós Descartes koordináta rendszerben
     vector<vector<float>> xy_ranges;                            // x_y értékek tárolása
     vector<int> object;                                         // egy objektumhoz tartozó pontok helyiértékei az "actual_ranges" vektorban
     vector<vector<int>> current_object_container;               // aktuális mérés alapján detektált objektumok pontértékeit tartalmazó vektorok tárolása
-    vector<float> middle_point_coordinates(2);                  // adott detektált objektum középpontjának távolsága 2 dimenziós Decart koordináta rendszerben
+    vector<float> middle_point_coordinates(2);                  // adott detektált objektum középpontjának távolsága 2 dimenziós Descartes koordináta rendszerben
     vector<vector<float>> object_middle_point_container;        // detektált objektumok középpontjainak tárolása
     vector<int> temporary_vec;                                  // feldolgozáshoz létrehozott ideiglenes vector
-    float x_range;                                              // adott pont X tengely irányú távolsága Decart koordináta rendszerben (x_y 0. eleme)
-    float y_range;                                              // adott pont Y tengely irányú távolsága Decart koordináta rendszerben (x_Y 1. eleme)
-    float x_distances = 0;                                      // adott objektum középpontjának X tengely irányú távolsága Decart koordináta rendszerben (middle_point_coordinates 0. eleme)
-    float y_distances = 0;                                      // adott objektum középpontjának Y tengely irányú távolsága Decart koordináta rendszerben (middle_point_coordinates 1. eleme)
+    float x_range;                                              // adott pont X tengely irányú távolsága Descartes koordináta rendszerben (x_y 0. eleme)
+    float y_range;                                              // adott pont Y tengely irányú távolsága Descartes koordináta rendszerben (x_Y 1. eleme)
+    float x_distances = 0;                                      // adott objektum középpontjának X tengely irányú távolsága Descartes koordináta rendszerben (middle_point_coordinates 0. eleme)
+    float y_distances = 0;                                      // adott objektum középpontjának Y tengely irányú távolsága Descartes koordináta rendszerben (middle_point_coordinates 1. eleme)
     float point_to_point_distance;                              // két egymás meletti helyiértékű pont egymástól való távolsága
     int point_num = 0;                                          // segéd változó
     int point_cnt = 0;                                          // segéd változó
@@ -513,7 +513,7 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
         middle_point_coordinates[0] = x_distances;
         middle_point_coordinates[1] = y_distances;
 
-        // objektum számított középpontjának távolságának eltárolása (Decart koordináta rendszerben)
+        // objektum számított középpontjának távolságának eltárolása (Descartes koordináta rendszerben)
         object_middle_point_container.push_back(middle_point_coordinates);
 
         x_distances = 0;
@@ -625,7 +625,7 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
 
             if(closest_interesting_object_x_range_container[0] < 0.5){
 
-                float u = avg_rel_vel_of_closest_interesting_object * 0.9;
+                float u = avg_rel_vel_of_closest_interesting_object * 0.7;
 
                 if(acc_on_off == true & object_detected == true){
                     display_info.control_sign = u * 0.2;
@@ -653,16 +653,7 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
             }
             else{
 
-                if(veh_vel_control_lin < linear_vel){
-
-                    veh_vel_control_lin = veh_vel_control_lin + 0.01;
-
-                }
-                else{
-
-                    veh_vel_control_lin = linear_vel;
-
-                }
+                veh_vel_control_lin = linear_vel;
 
             }
 
@@ -690,13 +681,13 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
 
             if(actual_ranges[i] != 0){
 
-                if((i < 90) /*& (right_turn == false)*/){                                       //MINDKÉT IF-BE BELEÍRTAM RIGHT_TURN==-T, SZERINTEM, MERT EDDIG AKKOR IS DETEKTÁLTA A JOBB OLDALI DOLGOKAT, HA BALRA FORDULT ÉS FORDÍTVA, EZ TALÁN MEGOLDAJ, SZERINTEM IGEN, DE LE KELL TESZTELNI
+                if(i < 90){                                       
 
                     object_turning_radius = sin((i*M_PI/180)) * avg_turning_radius;
 
                 }
 
-                if((i > 269) /*& (right_turn == true)*/){
+                if(i > 269){
 
                     object_turning_radius = sin(((i-269)*M_PI/180)) * avg_turning_radius;
 
@@ -748,7 +739,7 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
         // ha érzékelt pontot, amely 1m-nél közelebb van és egybeesik a fordulási sugárral
         if(closest_object_range < 1){
 
-            if(acc_on_off == true){             // INNEN HIÁNYZOTT EGY = JEL AZ IF-BŐL ÉS EZ MIATT MINDIG TRUE-RA TETTE, LEHET EZ SEGÍT VALAMIT 
+            if(acc_on_off == true){             
 
                 cout << "Objektum detektálva, objektum fordulási sugara: " << object_turning_radius << " m\n";
                 cout << "Objektum távolsága: " << closest_object_range << " m\n";
@@ -777,7 +768,7 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
                     if((prev_closest_object_range-closest_object_range) > 0.05){ 
 
                         veh_vel_control_lin = veh_vel_measured + 0.01;
-                        veh_vel_control_ang = veh_vel_control_ang + (((angular_vel / (linear_vel*10)))*0.1);        // 0 HELYETT MINDKÉT HELYRE 0.05-ÖT ÍRTAM, SZERINTEM JOBB LESZ, ÍGY MERT ÍGY LESZ EGY ÁTMENETI TARTOMÁNY
+                        veh_vel_control_ang = veh_vel_control_ang + (((angular_vel / (linear_vel*10)))*0.1);        
 
                         // nem enged magasabb sebességértéket kivezérelni a megadott sebességnél
                         if(veh_vel_control_lin > linear_vel){
@@ -813,18 +804,8 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
                 // ha adott értéknélm esszebb vagyunk a ponttól, akkor a szabályzó átveszi a billentyűkkel beállított értékeket
                 else{
 
-                    if(veh_vel_control_lin < linear_vel){
-
-                    veh_vel_control_lin = veh_vel_control_lin + 0.01;
-                    veh_vel_control_ang = veh_vel_control_ang + (((angular_vel / (linear_vel*10)))*0.1);
-
-                    }
-                    else{
-
-                        veh_vel_control_lin = linear_vel;
-                        veh_vel_control_ang = angular_vel;
-
-                    }
+                    veh_vel_control_lin = linear_vel;
+                    veh_vel_control_ang = angular_vel;
 
                 }
             
@@ -896,64 +877,72 @@ void callback_lidar(const sensor_msgs::LaserScan::ConstPtr& data){
     }
 
     // a vizualizációhoz szükséges adatok betöltése a display_info üzenetbe és publishálás
-    display_info.kanyarodas = turning;
-    display_info.jobbra_kanyarodas = right_turn;
-    display_info.fordulokor_sugar = avg_turning_radius;
+    {
+        display_info.kanyarodas = turning;
+        display_info.jobbra_kanyarodas = right_turn;
+        display_info.fordulokor_sugar = avg_turning_radius;
 
-    vector<float> x_container;
-    vector<float> y_container;
-    vector<float> middlepoint_x_container;
-    vector<float> middlepoint_y_container;
+        vector<float> x_container;
+        vector<float> y_container;
+        vector<float> middlepoint_x_container;
+        vector<float> middlepoint_y_container;
 
-    for(int i = 0; i < xy_ranges.size(); i++){
+        for(int i = 0; i < xy_ranges.size(); i++){
 
-        x_container.push_back(xy_ranges[i][0]);
-        y_container.push_back(xy_ranges[i][1]);
+            x_container.push_back(xy_ranges[i][0]);
+            y_container.push_back(xy_ranges[i][1]);
 
-    }
-    
-    for(int i = 0; i<object_middle_point_container.size(); i++){
-
-        middlepoint_x_container.push_back(object_middle_point_container[i][0]);
-        middlepoint_y_container.push_back(object_middle_point_container[i][1]);
-
-    }
-
-    display_info.pontok_x = x_container;
-    display_info.pontok_y = y_container;
-    display_info.objektum_kozeppont_x = middlepoint_x_container;
-    display_info.objektum_kozeppont_y = middlepoint_y_container;
-
-    display_info.linear_vel = linear_vel;
-    display_info.angular_vel = angular_vel;
-    display_info.acc_on_off = acc_on_off;
-    display_info.lock_on = lock_on;
-    display_info.veh_vel_measured = veh_vel_measured;
-    display_info.object_detected = object_detected;
-    if(acc_on_off == true & object_detected == true){
-
+        }
         
+        for(int i = 0; i<object_middle_point_container.size(); i++){
 
-        if(turning == false & angular_vel == 0){
-            display_info.object_speed = veh_vel_measured + avg_rel_vel_of_closest_interesting_object;
-            display_info.closest_object_range = closest_interesting_object_x_range_container[0];;
+            middlepoint_x_container.push_back(object_middle_point_container[i][0]);
+            middlepoint_y_container.push_back(object_middle_point_container[i][1]);
+
+        }
+
+        display_info.pontok_x = x_container;
+        display_info.pontok_y = y_container;
+        display_info.objektum_kozeppont_x = middlepoint_x_container;
+        display_info.objektum_kozeppont_y = middlepoint_y_container;
+
+        display_info.linear_vel = linear_vel;
+        display_info.angular_vel = angular_vel;
+        display_info.acc_on_off = acc_on_off;
+        display_info.lock_on = lock_on;
+        display_info.veh_vel_measured = veh_vel_measured;
+        display_info.object_detected = object_detected;
+        if(acc_on_off == true & object_detected == true){
+
+            
+
+            if(turning == false & angular_vel == 0){
+                display_info.object_speed = veh_vel_measured + avg_rel_vel_of_closest_interesting_object;
+                display_info.closest_object_range = closest_interesting_object_x_range_container[0];;
+            }
+            else{
+                display_info.closest_object_range = closest_object_range;
+                display_info.object_speed =  (veh_vel_measured + ((closest_object_range - prev_closest_object_range) / 0.2))/10;
+            }
+
+            prev_closest_object_range = closest_object_range;
+
+
+            display_info.veh_vel_control_lin = veh_vel_control_lin;
+
         }
         else{
-            display_info.closest_object_range = closest_object_range;
-            display_info.object_speed = veh_vel_measured + ((closest_object_range - prev_closest_object_range) * 0.2);
+
+            display_info.closest_object_range = 0;
+            display_info.object_speed = 0;
+            display_info.veh_vel_control_lin = 0;
+
         }
+        display_info.veh_vel_control_ang = veh_vel_control_ang;
+        display_info.object_turning_radius = object_turning_radius;
+
+        closest_object_range = 1;
     }
-    else{
-
-        display_info.closest_object_range = 0;
-
-    }
-    display_info.veh_vel_control_lin = veh_vel_control_lin;
-    display_info.veh_vel_control_ang = veh_vel_control_ang;
-    display_info.object_turning_radius = object_turning_radius;
-
-    closest_object_range = 1;
-
 
     pygame_visu_pub.publish(display_info);
 

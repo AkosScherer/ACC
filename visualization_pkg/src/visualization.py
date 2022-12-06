@@ -118,7 +118,7 @@ def visu_callback(data):
 
                 x = data.objektum_kozeppont_x[i] / 2 * -1000
                 y = data.objektum_kozeppont_y[i] / 2 * -1000
-                #pygame.draw.circle(SCREEN,Orange,(500+y,600+x),12)
+                pygame.draw.circle(SCREEN,Orange,(500+y,600+x),12)
 
         if (data.kanyarodas == False) & (data.angular_vel == 0):
 
